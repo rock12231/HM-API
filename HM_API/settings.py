@@ -46,12 +46,12 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware', #add whitenoise
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware', #add corsheaders
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'corsheaders.middleware.CorsMiddleware', #add corsheaders
 
 ]
 
@@ -63,7 +63,6 @@ CORS_ORIGIN_WHITELIST = [
     'http://localhost:4200',
 ]
 
-# APPEND_SLASH = False
 
 ROOT_URLCONF = 'HM_API.urls'
 
