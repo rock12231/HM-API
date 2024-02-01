@@ -8,7 +8,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
-
+from django.contrib.auth.models import User
 
 
 class UserProfileDetail(generics.RetrieveUpdateAPIView):
@@ -56,3 +56,19 @@ class UserRegistrationView(generics.CreateAPIView):
             'access': str(refresh.access_token),
         }
         return Response(response_data, status=status.HTTP_201_CREATED)
+    
+
+class UserProfileDetail(generics.RetrieveUpdateAPIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = UserProfileSerializer
+
+    def get_object(self):
+        return UserProfile.objects.get(user=self.request.user)
+
+    def put(self, request, *args, **kwargs):
+        user_profile = self.get_object()
+        serializer = UserProfileSerializer(user_profile, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
