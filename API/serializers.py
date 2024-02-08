@@ -28,24 +28,36 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 class UserProfileSerializer(serializers.ModelSerializer):
     username = serializers.CharField(source='user.username', read_only=True)
     email = serializers.EmailField(source='user.email', read_only=True)
-    first_name = serializers.CharField(source='user.first_name', read_only=True)
-    last_name = serializers.CharField(source='user.last_name', read_only=True)
+    first_name = serializers.CharField(source='user.first_name', required=False)  # Update to allow partial updates
+    last_name = serializers.CharField(source='user.last_name', required=False)  # Update to allow partial updates
     last_login = serializers.DateTimeField(source='user.last_login', read_only=True)
     date_joined = serializers.DateTimeField(source='user.date_joined', read_only=True)
     
     class Meta:
         model = UserProfile
-        fields = '__all__'
+        fields = ['username', 'email', 'first_name', 'last_name', 'last_login', 'date_joined', 'bio', 'college', 'branch', 'year', 'batch', 'occupation', 'avatar', 'githublink', 'linkedinlink', 'twitterlink', 'instagramlink', 'facebooklink', 'stackoverflowlink', 'otherlink']
 
-    # def create(self, validated_data):
-    #     user_data = validated_data.pop('user')
-    #     user = User.objects.create_user(**user_data)
-    #     profile = UserProfile.objects.create(user=user, **validated_data)
-    #     return profile
-    
     def update(self, instance, validated_data):
-        user_data = validated_data.pop('user')
+        # first_name = serializers.CharField(source='user.first_name', required=False)
+        # last_name = serializers.CharField(source='user.last_name', required=False)  
+        # Update these fields in the User model values comming from the request
         user = instance.user
+        # user.username = validated_data.get('username', user.username)
+        # user.email = validated_data.get('email', user.email)
+        # user.first_name = validated_data.get('last_name', instance.last_name)
+        # user.last_name = validated_data.get('last_name', instance.last_name)
+        # user.save()
+
+
+
+        # user = instance.user
+        # user.username = validated_data.get('username', user.username)
+        # user.email = validated_data.get('email', user.email)
+        # user.first_name = validated_data.get('last_name', instance.last_name)
+        # user.last_name = validated_data.get('last_name', instance.last_name)
+        # user.save()
+
+        # Update UserProfile fields
         instance.bio = validated_data.get('bio', instance.bio)
         instance.college = validated_data.get('college', instance.college)
         instance.branch = validated_data.get('branch', instance.branch)
@@ -60,15 +72,13 @@ class UserProfileSerializer(serializers.ModelSerializer):
         instance.facebooklink = validated_data.get('facebooklink', instance.facebooklink)
         instance.stackoverflowlink = validated_data.get('stackoverflowlink', instance.stackoverflowlink)
         instance.otherlink = validated_data.get('otherlink', instance.otherlink)
-        instance
-        user.username = user_data.get('username', user.username)
-        user.email = user_data.get('email', user.email)
-        user.first_name = user_data.get('first_name', user.first_name)
-        user.last_name = user_data.get('last_name', user.last_name)
-        user.save()
+        instance.gender = validated_data.get('gender', instance.gender)
         instance.save()
+
         return instance
 
+
+ 
 class UserCommentSerializer(serializers.ModelSerializer):
     user = serializers.CharField(source='user.username', read_only=True)
     like_count = serializers.SerializerMethodField()

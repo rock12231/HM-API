@@ -73,9 +73,15 @@ class UserProfileDetail(generics.RetrieveUpdateAPIView):
 
     def put(self, request, *args, **kwargs):
         user_profile = self.get_object()
+        first_name= request.data.get('first_name')
+        last_name= request.data.get('last_name')
+        user = user_profile.user
+        user.first_name = first_name
+        user.last_name = last_name
+        user.save()
         serializer = UserProfileSerializer(user_profile, data=request.data)
         serializer.is_valid(raise_exception=True)
-        serializer.save()
+        serializer.save(user=request.user)
         return Response(serializer.data, status=status.HTTP_200_OK)
     
 
