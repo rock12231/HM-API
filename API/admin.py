@@ -13,9 +13,9 @@ class HackeathonAdmin(admin.ModelAdmin):
 admin.site.register(Hackeathon, HackeathonAdmin)
 
 class UserCommentAdmin(admin.ModelAdmin):
-    list_display = ('id', 'user', 'post', 'content', 'created_at')
+    list_display = ('id', 'user', 'post', 'created_at', 'updated_at', 'content')
 admin.site.register(UserComment, UserCommentAdmin)
 
 class UserPostAdmin(admin.ModelAdmin):
-    list_display = ('id', 'user', 'title', 'content', 'created_at')
+    list_display = ('id', 'user', 'title', 'created_at', 'updated_at', 'member', 'types', 'deleted', 'content')
 admin.site.register(UserPost, UserPostAdmin)

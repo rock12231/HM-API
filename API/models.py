@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 
 GENDER_CHOICES = [ ('M', 'Male'), ('F', 'Female'), ('O', 'Other'),]
 OCCUPATION_CHOICES = [ ('S', 'Student'), ('P', 'Professional'),]
+TYPE_CHOICES = [ ('Member', 'Member'), ('Team', 'Team'),]
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -39,13 +40,16 @@ class UserPost(models.Model):
     hackeathon = models.TextField(blank=True)
     title = models.CharField(max_length=100)
     content = models.TextField()
+    member = models.IntegerField()
+    types = models.CharField(max_length=10, choices=TYPE_CHOICES, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     likes = models.ManyToManyField(User, related_name='post_likes', blank=True)
     dislikes = models.ManyToManyField(User, related_name='post_dislikes', blank=True)
     comments = models.ManyToManyField(UserComment, related_name='post_comments', blank=True)
     intrested = models.ManyToManyField(User, related_name='post_intrested', blank=True)
-
+    deleted = models.BooleanField(default=False)
+    # read_time = models.IntegerField(default=0)
 
 class Hackeathon(models.Model):
     title = models.CharField(max_length=100)
@@ -60,7 +64,7 @@ class Hackeathon(models.Model):
     eligibility = models.TextField()
     contact = models.TextField()
     link = models.TextField()
-    image = models.ImageField(upload_to='hackeathon/', blank=True, null=True)
+    # image = models.ImageField(upload_to='hackeathon/', blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     likes = models.ManyToManyField(User, related_name='hackeathon_likes', blank=True)

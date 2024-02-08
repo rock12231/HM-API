@@ -1,5 +1,5 @@
 from django.urls import path
-from API.views import UserProfileDetail, VerifyTokenView, UserRegistrationView,CustomTokenObtainPairView,UserLogoutView,UserPostView
+from API.views import UserProfileDetail, VerifyTokenView, UserRegistrationView,CustomTokenObtainPairView,UserLogoutView,UserPostView,HackeathonView
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 urlpatterns = [
@@ -14,4 +14,8 @@ urlpatterns = [
     path('register/', UserRegistrationView.as_view(), name='user-registration'),
 
     path('post/', UserPostView.as_view(), name='user-post'),
+    path('post/<int:pk>/', UserPostView.as_view(), name='user-post-detail'),
+
+    path('hackeathon/', HackeathonView.as_view(), name='hackeathon'),
+
 ]

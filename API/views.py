@@ -1,6 +1,6 @@
 from rest_framework import generics
-from API.models import UserProfile, UserPost
-from API.serializers import UserProfileSerializer,UserRegistrationSerializer, UserPostSerializer
+from API.models import UserProfile, UserPost, Hackeathon, UserComment
+from API.serializers import UserProfileSerializer,UserRegistrationSerializer, UserPostSerializer, HackeathonSerializer, UserCommentSerializer
 from rest_framework_simplejwt.tokens import AccessToken
 from rest_framework.decorators import authentication_classes, permission_classes
 from rest_framework.permissions import IsAuthenticated
@@ -111,8 +111,100 @@ class UserPostView(generics.ListCreateAPIView):
     serializer_class = UserPostSerializer
 
     def get_queryset(self):
-        return UserPost.objects.all().order_by('-created_at')
+        return UserPost.objects.filter(deleted=False).order_by('-created_at')
     
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def put(self, request, pk, *args, **kwargs):
+        try:
+            post = UserPost.objects.get(pk=pk)
+        except UserPost.DoesNotExist:
+            return Response({'detail': 'Post not found'}, status=status.HTTP_404_NOT_FOUND)
+        if post.user != request.user:
+            return Response({'detail': 'You do not have permission to edit this post'}, status=status.HTTP_403_FORBIDDEN)
+        serializer = UserPostSerializer(post, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def delete(self, request, pk, *args, **kwargs):
+        try:
+            post = UserPost.objects.get(pk=pk)
+        except UserPost.DoesNotExist:
+            return Response({'detail': 'Post not found'}, status=status.HTTP_404_NOT_FOUND)
+        if post.user != request.user:
+            return Response({'detail': 'You do not have permission to delete this post'}, status=status.HTTP_403_FORBIDDEN)
+        post.deleted = True
+        post.save()
+        return Response({'detail': 'Post successfully deleted'}, status=status.HTTP_204_NO_CONTENT)
+
+
+class HackeathonView(generics.ListCreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = HackeathonSerializer
+
+    def get_queryset(self):
+        return Hackeathon.objects.all().order_by('-created_at')
+    
+    def perform_create(self, serializer):
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    
+    def put(self, request, pk, *args, **kwargs):
+        try:
+            hackeathon = Hackeathon.objects.get(pk=pk)
+        except Hackeathon.DoesNotExist:
+            return Response({'detail': 'Hackeathon not found'}, status=status.HTTP_404_NOT_FOUND)
+        serializer = HackeathonSerializer(hackeathon, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    def delete(self, request, pk, *args, **kwargs):
+        try:
+            hackeathon = Hackeathon.objects.get(pk=pk)
+        except Hackeathon.DoesNotExist:
+            return Response({'detail': 'Hackeathon not found'}, status=status.HTTP_404_NOT_FOUND)
+        hackeathon.delete()
+        return Response({'detail': 'Hackeathon successfully deleted'}, status=status.HTTP_204_NO_CONTENT)
+    
+class UserCommentView(generics.ListCreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = UserCommentSerializer
+
+    def get_queryset(self):
+        return UserComment.objects.all().order_by('-created_at')
+    
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    
+    def put(self, request, pk, *args, **kwargs):
+        try:
+            comment = UserComment.objects.get(pk=pk)
+        except UserComment.DoesNotExist:
+            return Response({'detail': 'Comment not found'}, status=status.HTTP_404_NOT_FOUND)
+        if comment.user != request.user:
+            return Response({'detail': 'You do not have permission to edit this comment'}, status=status.HTTP_403_FORBIDDEN)
+        serializer = UserCommentSerializer(comment, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    def delete(self, request, pk, *args, **kwargs):
+        try:
+            comment = UserComment.objects.get(pk=pk)
+        except UserComment.DoesNotExist:
+            return Response({'detail': 'Comment not found'}, status=status.HTTP_404_NOT_FOUND)
+        if comment.user != request.user:
+            return Response({'detail': 'You do not have permission to delete this comment'}, status=status.HTTP_403_FORBIDDEN)
+        comment.delete()
+        return Response({'detail': 'Comment successfully deleted'}, status=status.HTTP_204_NO_CONTENT)
+    
+    def post(self, request, *args, **kwargs):
+        serializer = UserCommentSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(user=request.user)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
