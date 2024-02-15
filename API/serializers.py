@@ -1,7 +1,7 @@
 # myapp/serializers.py
 
 from rest_framework import serializers
-from API.models import UserProfile, UserComment, UserPost, Hackeathon
+from API.models import ProfileModel, CommentModel, PostModel, HackeathonModel, ForgotPasswordModel
 from django.contrib.auth.models import User
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework import serializers
@@ -14,7 +14,8 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         token['email'] = user.email
         return token
 
-class UserRegistrationSerializer(serializers.ModelSerializer):
+
+class RegistrationSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
     # Revome password validation
     def validate_password(self, value):
@@ -25,39 +26,39 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         fields = ['username', 'email', 'password']
     
 
-class UserProfileSerializer(serializers.ModelSerializer):
+class ForgotPasswordSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    # class Meta:
+    #     model = ForgotPasswordModel
+    #     fields = '__all__'
+
+
+class ResetPasswordSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    otp = serializers.CharField()
+    password = serializers.CharField()
+    # class Meta:
+    #     model = ForgotPasswordModel
+    #     fields = '__all__'
+
+
+class ProfileSerializer(serializers.ModelSerializer):
     username = serializers.CharField(source='user.username', read_only=True)
     email = serializers.EmailField(source='user.email', read_only=True)
     first_name = serializers.CharField(source='user.first_name', required=False)  # Update to allow partial updates
     last_name = serializers.CharField(source='user.last_name', required=False)  # Update to allow partial updates
     last_login = serializers.DateTimeField(source='user.last_login', read_only=True)
     date_joined = serializers.DateTimeField(source='user.date_joined', read_only=True)
-    
+
     class Meta:
-        model = UserProfile
-        fields = ['username', 'email', 'first_name', 'last_name', 'last_login', 'date_joined', 'bio', 'college', 'branch', 'year', 'batch', 'occupation', 'avatar', 'githublink', 'linkedinlink', 'twitterlink', 'instagramlink', 'facebooklink', 'stackoverflowlink', 'otherlink']
+        model = ProfileModel
+        fields = ['username', 'email', 'first_name', 'last_name', 'last_login', 'date_joined',
+                  'bio', 'college', 'branch', 'year', 'batch', 'occupation', 'githublink',
+                  'linkedinlink', 'twitterlink', 'instagramlink', 'facebooklink', 'stackoverflowlink',
+                  'otherlink','gender']
 
     def update(self, instance, validated_data):
-        # first_name = serializers.CharField(source='user.first_name', required=False)
-        # last_name = serializers.CharField(source='user.last_name', required=False)  
-        # Update these fields in the User model values comming from the request
         user = instance.user
-        # user.username = validated_data.get('username', user.username)
-        # user.email = validated_data.get('email', user.email)
-        # user.first_name = validated_data.get('last_name', instance.last_name)
-        # user.last_name = validated_data.get('last_name', instance.last_name)
-        # user.save()
-
-
-
-        # user = instance.user
-        # user.username = validated_data.get('username', user.username)
-        # user.email = validated_data.get('email', user.email)
-        # user.first_name = validated_data.get('last_name', instance.last_name)
-        # user.last_name = validated_data.get('last_name', instance.last_name)
-        # user.save()
-
-        # Update UserProfile fields
         instance.bio = validated_data.get('bio', instance.bio)
         instance.college = validated_data.get('college', instance.college)
         instance.branch = validated_data.get('branch', instance.branch)
@@ -74,12 +75,18 @@ class UserProfileSerializer(serializers.ModelSerializer):
         instance.otherlink = validated_data.get('otherlink', instance.otherlink)
         instance.gender = validated_data.get('gender', instance.gender)
         instance.save()
-
         return instance
 
 
- 
-class UserCommentSerializer(serializers.ModelSerializer):
+class ProfilePhotoSerializer(serializers.ModelSerializer):
+    avatar = serializers.ImageField()
+
+    class Meta:
+        model = ProfileModel
+        fields = ['avatar']
+
+
+class CommentSerializer(serializers.ModelSerializer):
     user = serializers.CharField(source='user.username', read_only=True)
     like_count = serializers.SerializerMethodField()
     dislike_count = serializers.SerializerMethodField()
@@ -91,25 +98,56 @@ class UserCommentSerializer(serializers.ModelSerializer):
         return obj.dislikes.count()
     
     class Meta:
-        model = UserComment
+        model = CommentModel
         fields = ['id', 'user', 'post', 'content', 'created_at', 'updated_at', 'like_count', 'dislike_count']
 
-class UserPostSerializer(serializers.ModelSerializer):
+
+class PostSerializer(serializers.ModelSerializer):
     user = serializers.CharField(source='user.username', read_only=True)
     like_count = serializers.SerializerMethodField()
-    comment_count = serializers.SerializerMethodField()
 
     def get_like_count(self, obj):
         return obj.likes.count()
 
+    
+    class Meta:
+        model = PostModel
+        fields = ['id', 'user','hackeathon','likes', 'types', 'title', 'content','member','created_at', 'updated_at', 'like_count']
+
+
+class PostCreateSerializer(serializers.ModelSerializer):
+    user = serializers.CharField(source='user.username', read_only=True)
+    like_count = serializers.SerializerMethodField()
+    comment_count = serializers.SerializerMethodField()
+    comments = CommentSerializer(many=True, read_only=True, source='commentmodel_set')
+    intrested = serializers.SerializerMethodField()
+
+    def get_like_count(self, obj):
+        return obj.likes.count()
+    
     def get_comment_count(self, obj):
         return obj.comments.count()
     
+    def get_intrested(self, obj):
+        return obj.intrested.count()
+    
+    def get_comments(self, obj):
+        return CommentSerializer(obj.comments.all(), many=True).data
+    
     class Meta:
-        model = UserPost
-        fields = ['id', 'user','hackeathon', 'types', 'title', 'content', 'created_at', 'updated_at', 'like_count', 'comment_count']
+        model = PostModel
+        fields = ['id', 'user','hackeathon','likes', 'types', 'title', 'content','member','created_at', 'updated_at', 'like_count', 'comment_count','comments','intrested']
+
+
+class LikeSerializer(serializers.ModelSerializer):
+    user = serializers.CharField(source='user.username', read_only=True)
+    
+    class Meta:
+        model = PostModel
+        fields = ['likes', 'user']
+
 
 class HackeathonSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Hackeathon
+        model = HackeathonModel
         fields = '__all__'

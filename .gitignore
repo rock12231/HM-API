@@ -32,3 +32,4 @@ local_settings.py
 
 # Ignore the virtual environment
 venv/
+.venv/
