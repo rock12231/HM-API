@@ -1,7 +1,7 @@
 databases:
-  - name: HM_API
+  - name: HMAPI
     plan: free
-    databaseName: HM_API
+    databaseName: HMAPI
     user: mysite
 
 services:
