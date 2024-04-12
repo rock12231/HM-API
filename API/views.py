@@ -12,17 +12,16 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.parsers import FileUploadParser
 from rest_framework_simplejwt.views import TokenObtainPairView
 from API.serializers import CustomTokenObtainPairSerializer,ForgotPasswordSerializer,ResetPasswordSerializer,ProfilePhotoSerializer
-from django.contrib.auth.hashers import make_password
 from rest_framework import filters
 from rest_framework.pagination import PageNumberPagination
-from rest_framework_simplejwt.token_blacklist.models import OutstandingToken, BlacklistedToken
 from django.contrib.auth.hashers import make_password
-from rest_framework.exceptions import AuthenticationFailed
 import random
 from django.core.mail import send_mail
 from datetime import timedelta
 from django.utils import timezone
 from django.contrib.auth.models import User
+from rest_framework import viewsets
+
 
 
 
@@ -417,3 +416,4 @@ class LikeCommentAPIView(generics.GenericAPIView):
         comment.save()
         serializer = self.get_serializer(comment)
         return Response({'liked': liked, 'likes_count': comment.likes.count()}, status=status.HTTP_200_OK)
+    
