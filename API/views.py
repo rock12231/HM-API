@@ -1,4 +1,5 @@
 import base64
+from django.http import HttpResponse
 from rest_framework import generics
 from API.models import ProfileModel, CommentModel, PostModel, HackeathonModel, ForgotPasswordModel
 from API.serializers import PostSerializer, CommentSerializer, ProfileSerializer, HackeathonSerializer, CustomTokenObtainPairSerializer, RegistrationSerializer, LikeSerializer,PostCreateSerializer
@@ -21,8 +22,6 @@ from datetime import timedelta
 from django.utils import timezone
 from django.contrib.auth.models import User
 from rest_framework import viewsets
-
-
 
 
 class CustomPagination(PageNumberPagination):
